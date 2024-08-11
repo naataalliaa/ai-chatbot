@@ -1,26 +1,13 @@
 "use client";
 
-import { Box, Button, Stack, TextField } from "@mui/material";
+import { Box, Button, Stack, TextField, Avatar } from "@mui/material";
 import { useState, useRef, useEffect } from "react";
+
 
 export default function Home() {
     // System prompt for the AI, providing guidelines on how to respond to users
-    const systemPrompt = `Welcome to VoyageGenius Customer Support
-I’m here to assist you with all your travel planning needs. At VoyageGenius, our goal is to make your journey effortless and enjoyable by providing you with tailored travel plans based on your preferences. Whether you’re looking to explore new destinations, find the best flights and accommodations within your budget, or just need help navigating our platform, I’m here to help.
-
-Here’s what I can assist you with:
-
-Travel Plan Creation: Provide details such as your budget, preferred destinations, travel dates, and the number of travelers. I will generate a customized travel plan that includes flight options and hotel comparisons, along with a detailed cost breakdown.
-
-Flight and Hotel Comparisons: I can help you compare flights and hotels from various sites to find the best deals and options that suit your needs.
-
-Booking Assistance: Once you’ve decided on your travel plan, I can provide direct links to book your flights and accommodations for the planned dates.
-
-Itinerary Details: Need more information about your travel plan? I can provide detailed itineraries, including routes, layovers, and hotel amenities.
-
-Problem Resolution: Encountering issues or have questions about your bookings or our services? Let me know, and I’ll assist you in resolving them swiftly.
-
-Please provide me with the details of your travel preferences or let me know how I can assist you today.`;
+    const systemPrompt = `Welcome to VoyageGenius Customer Support.
+I’m here to assist you with all your travel planning needs.`;
 
     // Stores all messages in chatbot conversation, intialised to a standard greeting message
     const [messages, setMessages] = useState([
@@ -32,31 +19,50 @@ Please provide me with the details of your travel preferences or let me know how
     const [userResponse, setUserResponse] = useState(""); // Stores the latest message from user
 
     // Function used to send the user's latest message to the API
-    const sendMessage = async () => {
+const sendMessage = async () => {
+    try {
         // Update messages and render user message
         setMessages((messages) => [
             ...messages,
             { role: "user", content: userResponse },
         ]);
+
         // Perform API call
-        const response = await fetch("api/chat", {
+        const response = await fetch("/api/chat", {
             method: "POST",
             headers: {
-                "Content-Type": "aplication/json",
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                messages: messages,
-                prompt: userResponse,
+                messages: [...messages, { role: "user", content: userResponse }],
             }),
         });
+
+        // Check if the response is OK
+        if (!response.ok) {
+            // Throw an error with more detailed information
+            const errorMessage = await response.text();
+            throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}: ${errorMessage}`);
+        }
+        // Parse JSON
         const data = await response.json();
+
+        // Log the response for debugging
+        console.log(data);
+
         // Update messages with the response from the API
         setMessages((messages) => [
             ...messages,
             { role: "assistant", content: data.message },
         ]);
-    };
-
+        
+        // Clear the input field
+        setUserResponse("");
+    } catch (error) {
+        console.error("Error:", error);
+        
+    }
+};
     return (
         <Box
             width="100vw"
@@ -75,10 +81,12 @@ Please provide me with the details of your travel preferences or let me know how
                 direction="column"
                 width="500px"
                 height="700px"
-                border="1px solid"
+                border="2.5px solid"
+                borderRadius="30px"
                 borderColor="rgb(var(--card-border-rgb))"
                 p={2}
                 spacing={3}
+                bo
             >
                 <Stack
                     direction="column"
@@ -96,20 +104,41 @@ Please provide me with the details of your travel preferences or let me know how
                                     ? "flex-start"
                                     : "flex-end"
                             }
+                            alignItems="center"
                         >
+                            {message.role === "assistant" && (
+                                <Avatar
+                                alt="Assistant"
+                                src="/components/chatbot.png"
+                                sx={{
+                                    mr: 1,
+                                    width: 80, 
+                                    height: 70, 
+                                }}
+     
+                                />
+                            )}
                             <Box
                                 sx={{
                                     bgcolor:
                                         message.role === "assistant"
-                                            ? "rgba(255, 165, 0, 0.7)"
+                                            ? "rgba(179, 206, 229, 0.7)"
                                             : "rgba(65, 105, 225, 0.7)",
-                                    color: "white",
+                                    color: "black",
                                     borderRadius: 2,
                                     p: 2,
+                                    maxWidth: "75%",
                                 }}
                             >
                                 {message.content}
                             </Box>
+                            {message.role !== "assistant" && (
+                                <Avatar
+                                alt="User"
+                                src="/components/user.png"
+                                sx={{ml:2}}
+                                />
+                            )}
                         </Box>
                     ))}
                 </Stack>

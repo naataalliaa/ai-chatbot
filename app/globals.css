@@ -5,15 +5,15 @@
     "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
     "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
 
-  --foreground-rgb: 0, 0, 0;
+  --foreground-rgb: 25, 25, 25;
   --background-start-rgb: 240, 248, 255;
-  --background-end-rgb: 255, 255, 255;
+  --background-end-rgb: 245, 245, 255;
 
   --primary-glow: conic-gradient(
     from 180deg at 50% 50%,
-    #ff9a76 0deg,
-    #ff6384 55deg,
-    #ff7e67 120deg,
+    #f3e9e5 0deg,
+    #191617 55deg,
+    #9c8884 120deg,
     #ffa726 160deg,
     transparent 360deg
   );
@@ -23,20 +23,20 @@
   );
 
   --tile-start-rgb: 255, 223, 186;
-  --tile-end-rgb: 255, 206, 162;
+  --tile-end-rgb: 295, 296, 192;
   --tile-border: conic-gradient(
-    #ffebc9,
+    #111110,
     #ffddb2,
     #ffcc9c,
     #ffbb86,
-    #ffa670,
-    #ff9933
+    #8d7b70,
+    #121110
   );
 
   --callout-rgb: 255, 248, 230;
   --callout-border-rgb: 255, 210, 180;
-  --card-rgb: 255, 192, 203;
-  --card-border-rgb: 255, 105, 180;
+  --card-rgb: 125, 249, 255;
+  --card-border-rgb: 55, 15, 10;
 }
 
 * {

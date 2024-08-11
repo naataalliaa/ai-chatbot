@@ -1,20 +1,54 @@
-import { NextResponse } from "next/server"; // Next.js's way of returning a response to user
-import dotenv, { config } from "dotenv";
+import { NextResponse } from "next/server";
+import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// POST function to handle incoming requests
 export async function POST(req) {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // AI model
+    try {
+        const genAI = new GoogleGenerativeAI({
+            apiKey: process.env.GEMINI_API_KEY,
+        });
 
-    const reqObj = await req.json(); // Parse request to JS object
-    const prompt = reqObj.prompt; // Extract prompt from user
+        // Extract and log the request body
+        const reqObj = await req.json();
+        console.log("Request Object:", reqObj);
 
-    const result = await model.generateContent(prompt); // Send prompt to model
-    const response = await result.response;
-    const textToSend = response.text(); // Convert response promise to text
+        const prompt = reqObj.messages?.[reqObj.messages.length - 1]?.content;
 
-    return NextResponse.json({ message: textToSend });
+        if (!prompt) {
+            throw new Error("No prompt provided");
+        }
+
+        const input = {
+            model: "gemini-pro",
+            contents: [prompt],
+        };
+
+        // Log the input to be sent to the API
+        console.log("API Input:", input);
+
+        const result = await genAI.generateContent(input);
+
+        // Log the result received from the API
+        console.log("API Result:", result);
+
+        const textToSend = result.candidates?.[0]?.content || "I'm sorry, I don't understand your request.";
+
+        return NextResponse.json({ message: textToSend });
+
+    } catch (error) {
+        console.error("Error:", error);
+
+        // Return more detailed error information
+        return NextResponse.json(
+            {
+                error: "Failed to generate a response from the AI model.",
+                details: error.message,
+                stack: error.stack,
+            },
+            { status: 500 }
+        );
+    }
 }
+
